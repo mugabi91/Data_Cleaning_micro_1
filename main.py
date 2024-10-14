@@ -1,4 +1,5 @@
 from funcs import *
+
 def main():
     # read in data frame 
     df: pd.DataFrame | None = ReadData(InputFilePath).read_data() # type: ignore
@@ -24,7 +25,10 @@ def main():
     export(df)
     print()
     
-if __name__ =="__main__":
+
+
+if __name__ == "__main__":
+    print(">>[INFO]: Running Funcs.py... The wrong file. Run Main.py...")  
     print(f">>[INFO]: Run the app.py file....")
     print(f">>[INFO]: Run the app.py file.........")
     print(f">>[INFO]: Run the app.py file..........")

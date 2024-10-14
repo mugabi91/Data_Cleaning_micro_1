@@ -1,1 +1,2 @@
-df=fix_number_columns(df) 
+if __name__ == "__main__":
+    print(">>[INFO]: Running Funcs.py... The wrong file. Run Main.py...")

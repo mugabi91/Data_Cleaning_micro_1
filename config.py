@@ -9,7 +9,6 @@
 
 InputFilePath:str  = r"C:\Users\M D\Desktop\Data_Cleaning_micro_1\dirty_data.csv"
 OutPutFileName:str= "Cleaned_data"
-
 FILE_EXPORT_TYPE:str|None = None
 ###############################################################################################################
 
@@ -17,10 +16,10 @@ FILE_EXPORT_TYPE:str|None = None
 # Add to the list below any email columns in your file 
 
 
-EMAIL_COLUMNS: list[str|None] = ["email"]
-DATE_COLUMNS: list[str|None] =["signup_date"]  
+EMAIL_COLUMNS: list[str|None] = ["eMaiL"]
+DATE_COLUMNS: list[str|None] =["signup_date #"]  
 AGE_COLUMNS: list[str|None] =[]   # Not implemented yet
-CURRENCY_COLUMNS: list[str|None] =["income"]  
+CURRENCY_COLUMNS: list[str|None] =["incOme)"]  
 ID_COLUMNS: list[str|None] =[]    # Not implemented yet
 
 

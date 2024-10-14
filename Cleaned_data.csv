@@ -1,0 +1,36 @@
+Id,Name,Age,Email,Membership_status,Income,Signup_date
+1,Alice the guy,22.0,alice@mail.com,Active,50000,2022-01-01
+2,Bob,33.0,bob@mail.com,Active,60000,2/15/2023
+3,Charlie,,,Inactive,70000,2019-10-03
+4,Darlene,45.0,darlene@mail.com,Inactive,55000,2018-07-25
+5,Eve,29.0,eve@mail.com,Active,85000,2021-12-05
+6,Frank,23.0,frank@mail.com,Active,100000,6/30/2020
+7,George,,,Inactive,40000,2019-09-09
+8,Harriet,31.0,,Active,25000,10/31/2021
+9,Ivan,19.0,,Inactive,50000,2018-11-20
+10,J ack,41.0,jack@mail.com,Active,80000,2017-01-12
+11,Kate,27.0,,Active,120000,1/15/2016
+12,L ura,,laura@mail.com,Inactive,90000,2015-05-03
+13,Mike,35.0,,Active,65000,2022-09-08
+14,Nancy,50.0,nancy@mail.com,Inactive,30000,2020-09-17
+15,Oliver,60.0,,Active,45000,7/22/2023
+16,Peter,38.0,peter@mail.com,Inactive,20000,2018-05-05
+17,Q_bert,29.0,,Inactive,75000,2019-11-11
+18,Rob,22.0,rob@mail.com,Active,150000,2021-01-04
+19,Susan,20.0,,Active,110000,8/18/2020
+20,Tim,34.0,tim@mail.com,Inactive,35000,6/21/2017
+21,Uma,25.0,,Active,50000,2022-10-10
+22,V_era,42.0,vera@mail.com,Active,60000,1/20/2023
+23,Will,,,Inactive,80000,3/15/2020
+24,Xavier,40.0,,Active,70000,2/28/2021
+25,Yvonne,28.0,,Inactive,40000,12/30/2019
+26,Zack,36.0,,Active,85000,2020-01-07
+27,A aron,30.0,,Active,60000,2016-12-04
+28,Be tty,,betty@mail.com,Inactive,90000,12/25/2015
+29,Car los,21.0,,Inactive,100000,2023-09-09
+30,De bra,31.0,debra@mail.com,Inactive,200000,2017-08-08
+31,Trevor,25.0,Trevortravis91@gmail.com,Active,2000000,1999-07-17
+32,Trevor,25.0,Trevortravis91@gmail.com,Active,2000,1999-07-17
+33,Trevor,25.0,Trevortravis91@gmail.com,Active,2000000000,1999-07-17
+33,Trevor,25.0,Trevortravis91@gmail.com,Active,2000000000000000000,1999-07-17
+33,Trevor,25.0,Trevortravis91@gmail.com,Active,2000000,1999-07-17
