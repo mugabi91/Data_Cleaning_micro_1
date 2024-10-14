@@ -18,10 +18,10 @@ FILE_EXPORT_TYPE:str|None = None
 
 
 EMAIL_COLUMNS: list[str|None] = ["email"]
-DATE_COLUMNS: list[str|None] =[]  
-AGE_COLUMNS: list[str|None] =[]  
-CURRENCY_COLUMNS: list[str|None] =[]  
-ID_COLUMNS: list[str|None] =[]  
+DATE_COLUMNS: list[str|None] =["signup_date"]  
+AGE_COLUMNS: list[str|None] =[]   # Not implemented yet
+CURRENCY_COLUMNS: list[str|None] =["income"]  
+ID_COLUMNS: list[str|None] =[]    # Not implemented yet
 
 
 ###############################################################################################################

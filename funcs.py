@@ -4,14 +4,17 @@ import re
 import numpy as np
 from rich import  print as rprint
 from streamlit import success
-from  conf import InputFilePath, OutPutFileName, EMAIL_COLUMNS ,DATE_COLUMNS,FILE_EXPORT_TYPE
+from  conf import InputFilePath, OutPutFileName, EMAIL_COLUMNS ,DATE_COLUMNS,FILE_EXPORT_TYPE,CURRENCY_COLUMNS
 from dataclasses import dataclass
+from datetime import datetime
 
 
-# Email regex expression for email validation
+# regex expression for email validation
 EMAIL_PATTERN = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
 
-# Email regex expression for email validation
+# regex expression for date validation
+DATE_PATTERN = r"\b(\d{1,2}[-/]\d{1,2}[-/]\d{2,4}|\d{4}[-/]\d{1,2}[-/]\d{1,2})\b"
+
 
 
 # Representation func
@@ -236,7 +239,7 @@ def indexing_df_columns(store_list, columns ,df:pd.DataFrame):
 
 
 # name tracker func         
-def track_names(EMAIL_COLUMNS:list[str]|None, DATE_COLUMNS:list[str]|None , df:pd.DataFrame):
+def track_names(EMAIL_COLUMNS:list[str]|None, DATE_COLUMNS:list[str]|None,CURRENCY_COLUMNS:list[str]|None, df:pd.DataFrame):
     """_summary_
 
     Args:
@@ -250,30 +253,77 @@ def track_names(EMAIL_COLUMNS:list[str]|None, DATE_COLUMNS:list[str]|None , df:p
         if df is not  None:
             email_column_indexes = []
             date_column_indexes=[]
+            currency_column_indexes=[]
             if EMAIL_COLUMNS is not None:
                 indexing_df_columns(email_column_indexes,EMAIL_COLUMNS,df)
             
+            if CURRENCY_COLUMNS is not None:
+                indexing_df_columns(currency_column_indexes, CURRENCY_COLUMNS,df)
+            
             if DATE_COLUMNS is not None:
                 indexing_df_columns(date_column_indexes,DATE_COLUMNS,df)
-            print(f"Tracked names indexes")
-            rprint(email_column_indexes)
-            rprint(date_column_indexes)
-            return email_column_indexes, date_column_indexes
+            # print(f"Tracked names indexes")
+            # rprint(email_column_indexes)
+            # rprint(date_column_indexes)
+            return email_column_indexes, date_column_indexes, currency_column_indexes
     except Exception as e:
             print(f"Error has occured")
             print()
             print(f"Error is :{e}")
             print(">>[DataFrame Error]: DataFrame cant be None. Check your dataframe or input_file_path...")
         
-        
+# date parser
+def format_date(date_str):
+    for fmt in ("%d-%m-%Y", "%Y/%m/%d", "%d/%m/%Y", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(date_str, fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+    return None  # Return None if no format matches
 
+
+def fix_currency(currency_str:str):
+    """cleans currency 
+
+    Args:
+        currency_str (str): takes the str of the currency to clean it further 
+    """
+    currency_dict = {
+        "K":  1_000,
+        "M":  1_000_000,
+        "B":  1_000_000_000,
+        "T" : 1_000_000_000_000,
+        "Qa": 1_000_000_000_000_000,
+        "Qi": 1_000_000_000_000_000_000
+}
+    currency = currency_str.strip().replace(" ","")
+    for letter in currency_dict.keys():
+        if currency.endswith(letter.lower()) or currency.endswith(letter.upper()):
+            currency = "".join(re.findall(r"[^a-zA-Z\\s]",currency))
+            currency = int(currency) * currency_dict.get(letter,1)
+            return currency
+        
+    return int("".join(re.findall(r"[^a-zA-Z\\s]",currency)))
 
 # date fixer func 
 def fix_dates(x):
-    raise NotImplementedError
+    # Find and format dates
+    dates = re.findall(DATE_PATTERN, x)
+
+    # Print formatted dates
+    for date in dates:
+        formatted_date = format_date(date)
+        if formatted_date:
+            print(f"Found and formatted date: {formatted_date}")
+            return formatted_date
+        else:
+            print(f"Could not format date: {date}")
+            return x
+    print(f">>[Dates]: Dates have been fixed")
+
 
 # string column fixer func 
-def fix_str_columns(df:pd.DataFrame, email_column_indexes, date_column_indexes):
+def fix_str_columns(df:pd.DataFrame, email_column_indexes:list[int]|None, date_column_indexes:list[int]|None, currency_column_indexes:list[int]|None):
     """This handles all the str manipulations to emails, dates, 
 
     Args:
@@ -282,32 +332,38 @@ def fix_str_columns(df:pd.DataFrame, email_column_indexes, date_column_indexes):
         date_column_indexes (_type_): _description_
 
     Returns:
-        _type_: _description_
+        df 
     """
+    
     columns = df.select_dtypes(include="object").columns.to_list()
-    emails = [df.columns.tolist()[index] for index in email_column_indexes]
-    dates = [df.columns.tolist()[index] for index in date_column_indexes]
+    emails = [df.columns.tolist()[index] for index in email_column_indexes] if email_column_indexes is not None else []
+    dates = [df.columns.tolist()[index] for index in date_column_indexes] if date_column_indexes is not None else []
+    currencies = [df.columns.tolist()[index] for index in currency_column_indexes] if currency_column_indexes is not None else []
+    
     print(f"list of all object dtype columns: {columns}")
     for column in columns:
         # print(f"List to compare emails:{emails} ---> current column:{column}")
         # print(f"List to compare dates:{dates} ---> current column:{column}")
         if column in emails: # type: ignore
-            df[f"{column}"] = df[f"{column}"].apply(lambda x:fix_emails(x) ) 
+            df[f"{column}"] = df[f"{column}"].apply(lambda x:fix_emails(x)) 
             print(f"{column}:has been fixed successfully")
         elif column in dates:  # type: ignore
-            df[f"{column}"] = df[f"{column}"].apply(lambda x:fix_dates(x) ) 
+            df[f"{column}"] = df[f"{column}"].apply(lambda x:fix_dates(x)) 
+            print(f"{column}:has been fixed successfully")
+        elif column in currencies:
+            df[f"{column}"] = df[f"{column}"].apply(lambda x:fix_currency(fix_words(x))) 
             print(f"{column}:has been fixed successfully")
         else:
-            df[f"{column}"] = df[f"{column}"].apply(lambda x:fix_words(x) ) 
+            df[f"{column}"] = df[f"{column}"].apply(lambda x:fix_words(x)) 
             print(f"{column}:has been fixed successfully")
             
     return df
 
 
-def fix_number_columns(df:pd.DataFrame):
-    for column in df.select_dtypes(include="number").columns:
-        df[f"{column}"] = df[f"{column}"].apply(lambda x:fix_numbers(x)) 
-    return df
+# def fix_number_columns(df:pd.DataFrame):
+#     for column in df.select_dtypes(include="number").columns:
+#         df[f"{column}"] = df[f"{column}"].apply(lambda x:fix_numbers(x)) 
+#     return df
 
 if __name__ == "__main__":
     print(">>[INFO]: Running Funcs.py... The wrong file. Run Main.py...")
