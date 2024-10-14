@@ -4,7 +4,7 @@ import re
 import numpy as np
 from rich import  print as rprint
 from streamlit import success
-from  conf import InputFilePath, OutPutFileName, EMAIL_COLUMNS ,DATE_COLUMNS,FILE_EXPORT_TYPE,CURRENCY_COLUMNS
+from  config import InputFilePath, OutPutFileName, EMAIL_COLUMNS ,DATE_COLUMNS,FILE_EXPORT_TYPE,CURRENCY_COLUMNS,my_email
 from dataclasses import dataclass
 from datetime import datetime
 
