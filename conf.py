@@ -1,25 +1,44 @@
+########################### Watch the type data types of your input ######################################
 ## Enter the file_path to the file you want to clean
 # The input file path is the path of the file you want to clean on your computer.
 # forexample input_file_path = r"C:\Users\M D\Desktop\baby.xlsx"
-InputFilePath  = r"C:\Users\M D\Desktop\df_cleaner\dirty_data.csv"
-
-## Enter the name of the output file after the clean
-# forexample output_file_name = "cleaned_data"
-OutPutFileName = "cleaned"
 
 
-## Enter Email columns  // ONLY SET IF YOU HAVE EMAILS COLUMNS OTHERWISE LEAVE EMPTY
+# [Optional]: Input file export type eg "csv" for a comma seperated file or "Excel" for xlsx,xlms, xls etc.
+# returns a csv file by default if not set to anything.
+
+InputFilePath:str  = r"C:\Users\M D\Desktop\Data_Cleaning_micro_1\dirty_data.csv"
+OutPutFileName:str= "Cleaned_data"
+
+FILE_EXPORT_TYPE:str|None = None
+###############################################################################################################
+
+# // ONLY SET IF YOU HAVE COLUMNS THAT MEET THAT COLUMN TYPE OTHERWISE LEAVE EMPTY
 # Add to the list below any email columns in your file 
-#  MIND THE SPELLING 
-
-EMAIL_COLUMNS = ["email"]
-
-## Enter DATE columns  // ONLY SET IF YOU HAVE  DATE COLUMNS OTHERWISE LEAVE EMPTY
-# Add to the list below any date columns in your file 
-#  MIND THE SPELLING 
-DATE_COLUMNS =[]
 
 
+EMAIL_COLUMNS: list[str|None] = ["email"]
+DATE_COLUMNS: list[str|None] =[]  
+AGE_COLUMNS: list[str|None] =[]  
+CURRENCY_COLUMNS: list[str|None] =[]  
+ID_COLUMNS: list[str|None] =[]  
+
+
+###############################################################################################################
+"""
+Age or Date Fields: Ensure valid ranges (e.g., no negative age).
+Currency: Standardize to a specific currency for uniformity.
+Percentages: Ensure they fall between 0 and 100.
+IDs or Phone Numbers: Check for duplicates or invalid formats.
+Timestamps: Ensure proper time zone handling when applicable.
+"""
 
 # take care of dates , date validator,different formats
 # take care of number cols , currency, age 
+
+
+if __name__ == "__main__":
+    print(f">>[INFO]: Your running Conf.py..")
+    print(f">>[INFO]: Your running Conf.py..")
+    print(f">>[INFO]: Your running Conf.py..")
+    print(f">>[INFO]: Run the main.py NOT Conf.py..")

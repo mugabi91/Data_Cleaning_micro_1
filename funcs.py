@@ -3,7 +3,9 @@ import pandas as pd
 import re
 import numpy as np
 from rich import  print as rprint
-from  conf import InputFilePath, OutPutFileName, EMAIL_COLUMNS ,DATE_COLUMNS
+from streamlit import success
+from  conf import InputFilePath, OutPutFileName, EMAIL_COLUMNS ,DATE_COLUMNS,FILE_EXPORT_TYPE
+from dataclasses import dataclass
 
 
 # Email regex expression for email validation
@@ -20,11 +22,80 @@ def repr(df:pd.DataFrame):
         df (pd.DataFrame): pd.DataFrame 
     """
     print()
-    print("Below are the data types of the file")
+    print("Below are the column names and their data types in the file".upper())
     print(df.dtypes)
     print()
     print("Below is the overview of the first five entries of the file")
     print(df.head())
+
+@dataclass    
+class ReadData:
+    """ Contains all methods that are applied when you read in data
+
+    Returns:
+        _type_: _description_
+    """
+    file_path:str
+    # read data in func
+    def read_data(self):
+        """ uses pandas to read in data from an excel or csv file
+
+        Args:
+            file_path (str): path to excel or csv file 
+
+        Returns:
+            pd.DataFrame | None
+        """
+        try:
+            file_type = self.file_path.split(".")[-1].lower()
+            if file_type in ['xlsx', 'xlsm', 'xlsb', 'xls']:
+                # Read Excel files using the appropriate engine if needed
+                df =  pd.read_excel(self.file_path, engine='openpyxl' if file_type == 'xlsx' else None)
+                read_status(df)
+                fill_nans(df)
+                repr(df)
+                return df
+            elif file_type == 'csv':
+                # Read CSV files
+                df = pd.read_csv(self.file_path)
+                read_status(df)
+                fill_nans(df)
+                repr(df)
+                return df
+            elif file_type == 'txt':
+                # Read tab-delimited files
+                df =  pd.read_csv(self.file_path, delimiter='\t')
+                read_status(df)
+                fill_nans(df)
+                repr(df)
+                return df
+            elif file_type == 'ods':
+                # Read OpenDocument Spreadsheet
+                df = pd.read_excel(self.file_path, engine='odf')
+                read_status(df)
+                fill_nans(df)
+                repr(df)
+                return df
+            elif file_type == 'xml':
+                # Read XML-based spreadsheets (if compatible)
+                df =  pd.read_xml(self.file_path)
+                read_status(df)
+                fill_nans(df)
+                repr(df)
+                return df
+            elif file_type in ['htm', 'html']:
+                # Read HTML tables into DataFrame
+                df =  pd.read_html(self.file_path)[0]  # Select the first table found
+                read_status(df)
+                fill_nans(df)
+                repr(df)
+                return df
+            else:
+                raise ValueError(f"Unsupported file format: {file_type}")
+        except FileNotFoundError as e:
+            print(f">>[Read failed]: The file doesn't exist. Check the input file path. Error:{e}")
+        
+
 
 def read_status(df:pd.DataFrame):
     """ prints out the read Status 
@@ -33,34 +104,16 @@ def read_status(df:pd.DataFrame):
         df (pd.DataFrame): Data frame we are reading 
     """
     print(">>[Read Successful]:", "Data had been read successfully")
+
+# fills in any empty values
+def fill_nans(df):
+    """ Fills up any empty entries with np.nan
+    Args:
+        df (_type_): pandas Data frame its to fill 
+    """
     df = df.fillna(np.nan)
     
-# read data in func
-def read_data(file_path:str):
-    """ uses pandas to read in data from an excel or csv file
 
-    Args:
-        file_path (str): path to excel or csv file 
-
-    Returns:
-        pd.DataFrame | None
-    """
-    try:
-        file_type = file_path.split(".")[-1] 
-        match file_type:
-            case "csv":
-                df =  pd.read_csv(file_path)
-                read_status(df)
-                repr(df)
-                return df
-            case "xlsx":  
-                df =  pd.read_excel(file_path)
-                read_status(df)
-                repr(df)
-                return df
-    except FileNotFoundError as e:
-        print(f">>[Read failed]: Error {e}")
-    
 # fix names func in df
 def fix_names(df:pd.DataFrame):
     """Removes any extra spaces in the column/variable names and replaces them with underscores to keep them nice and nea.
@@ -83,7 +136,7 @@ def fix_names(df:pd.DataFrame):
     return df
 
 # export data out func
-def export(df:pd.DataFrame, file_name:str=OutPutFileName): # type: ignore
+def export(df:pd.DataFrame, file_name:str=OutPutFileName , export_file_type:str|None=FILE_EXPORT_TYPE): # type: ignore
     """ Exports your dataFrame to a csv the working directory of your choice
 
     Args:
@@ -91,12 +144,27 @@ def export(df:pd.DataFrame, file_name:str=OutPutFileName): # type: ignore
         file_name (str, optional): File name or pathfile to where to save the file 
         eg data.csv or directory/of.my/choice/data.csv
     """
+    success_message = f">>[Save Successful]: The data has been saved in file name '{OutPutFileName}.csv' on your pc.."
     try:
-        df.to_csv(f"{file_name}.csv", index=False)
-        rprint(f">>[Save Successful]: The data has been saved in file name {OutPutFileName} on your pc..")
-    except FileExistsError as e:
-        rprint(f">>[Save Successful]: There is a file already named {OutPutFileName} on your pc..")
-    
+        if export_file_type is not None:
+            match export_file_type.strip().lower():
+                case "csv":
+                    df.to_csv(f"{file_name}.csv", index=False)
+                    rprint(success_message)
+                case "excel":
+                    df.to_excel(f"{file_name}.xlsx", engine="openpyxl", index=False) 
+                    rprint(f">>[Save Successful]: The data has been saved in file name '{OutPutFileName}.xlsx' on your pc..")
+                case _ :
+                    df.to_csv(f"{file_name}.csv", index=False)
+                    rprint(success_message)
+        else:
+            df.to_csv(f"{file_name}.csv", index=False)
+            rprint(f">>[Save Successful]: The data has been saved in file name '{OutPutFileName}' on your pc..")
+            
+    except (FileExistsError, Exception) as e:
+            rprint(f">>[Save UnSuccessful]: There is an issue with the file your trying to save '{OutPutFileName}'. Check if the File already exists.")
+            rprint(f">>[Save UnSuccessful Error]: {e}")
+        
 # fix emails vars func 
 def fix_emails(x:str):
     """This method validates and fixes email addresses in an email column
@@ -123,8 +191,8 @@ def fix_words(x):
                 return new_name.capitalize()
         else:
                 return x
-           
-           
+
+
 # fix numbers func 
 def fix_numbers(x):
     if isinstance(x,(int,float)):
@@ -135,7 +203,7 @@ def fix_numbers(x):
         return new_number
     else:
         return x
-    
+
 
 # emails validator func
 def is_valid_email(email):
@@ -165,10 +233,10 @@ def indexing_df_columns(store_list, columns ,df:pd.DataFrame):
             store_list.append(column_index)
     except Exception as e:
         print(f"Exception {e} has occured ")
-        
-        
+
+
 # name tracker func         
-def track_names(EMAIL_COLUMNS, DATE_COLUMNS , df:pd.DataFrame):
+def track_names(EMAIL_COLUMNS:list[str]|None, DATE_COLUMNS:list[str]|None , df:pd.DataFrame):
     """_summary_
 
     Args:
@@ -178,17 +246,27 @@ def track_names(EMAIL_COLUMNS, DATE_COLUMNS , df:pd.DataFrame):
     Returns:
         _type_: _description_
     """
-    if df is not  None:
-        email_column_indexes = []
-        date_column_indexes=[]
-        indexing_df_columns(email_column_indexes,EMAIL_COLUMNS,df)
-        indexing_df_columns(date_column_indexes,DATE_COLUMNS,df)
-        # print(f"Tracked names indexes")
-        # rprint(email_column_indexes)
-        # rprint(date_column_indexes)
-        return email_column_indexes , date_column_indexes
-    else: 
-        print(">>[DataFRame Error]: DataFrame cant be None. Check your dataframe...")
+    try:
+        if df is not  None:
+            email_column_indexes = []
+            date_column_indexes=[]
+            if EMAIL_COLUMNS is not None:
+                indexing_df_columns(email_column_indexes,EMAIL_COLUMNS,df)
+            
+            if DATE_COLUMNS is not None:
+                indexing_df_columns(date_column_indexes,DATE_COLUMNS,df)
+            print(f"Tracked names indexes")
+            rprint(email_column_indexes)
+            rprint(date_column_indexes)
+            return email_column_indexes, date_column_indexes
+    except Exception as e:
+            print(f"Error has occured")
+            print()
+            print(f"Error is :{e}")
+            print(">>[DataFrame Error]: DataFrame cant be None. Check your dataframe or input_file_path...")
+        
+        
+
 
 # date fixer func 
 def fix_dates(x):
@@ -232,4 +310,4 @@ def fix_number_columns(df:pd.DataFrame):
     return df
 
 if __name__ == "__main__":
-    print(">>[INFO]: Running funcs.py...")
+    print(">>[INFO]: Running Funcs.py... The wrong file. Run Main.py...")
